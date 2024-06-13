@@ -19,7 +19,6 @@ namespace PruebaIngreso.Controllers
         {
             this.quote = quote;
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls12;
-
         }
 
         public ActionResult Index()
@@ -29,7 +28,7 @@ namespace PruebaIngreso.Controllers
 
         public ActionResult Test()
         {
-            var request = new TourQuoteRequest
+            var request = new TourQuoteRequest()
             {
                 adults = 1,
                 ArrivalDate = DateTime.Now.AddDays(1),
