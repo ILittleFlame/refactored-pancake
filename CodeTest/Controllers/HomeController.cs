@@ -3,6 +3,11 @@ using System.Linq;
 using System.Web.Mvc;
 using Quote.Contracts;
 using Quote.Models;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using System.Net;
+using PruebaIngreso.Models;
 
 namespace PruebaIngreso.Controllers
 {
@@ -13,6 +18,8 @@ namespace PruebaIngreso.Controllers
         public HomeController(IQuoteEngine quote)
         {
             this.quote = quote;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls12;
+
         }
 
         public ActionResult Index()
@@ -50,12 +57,47 @@ namespace PruebaIngreso.Controllers
             return View();
         }
 
-        public ActionResult Test3()
-        {
-            return View();
-        }
+      
+        public async Task<ActionResult> Test3()
+            {
+                var serviceCode = "E-U10-UNILATIN"; // Se puede cambiar esto a otros códigos para probar
+                var margin = await GetMarginFromApi(serviceCode);
 
-        public ActionResult Test4()
+                ViewBag.Margin = margin;
+
+                return View();
+            }
+
+            private async Task<double> GetMarginFromApi(string serviceCode)
+            {
+                var apiUrl = $"https://refactored-pancake.free.beeceptor.com/margin/{serviceCode}";
+
+                using (var httpClient = new HttpClient())
+                {
+                    try
+                    {
+                        var response = await httpClient.GetAsync(apiUrl);
+                        //Validacion del codigo de estado
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var responseData = await response.Content.ReadAsStringAsync();
+                            var marginData = JsonConvert.DeserializeObject<MarginResponse>(responseData);
+                            return marginData.Margin;
+                        }
+                        else
+                        {
+                            return 0.0;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Manejo de errores 
+                        Console.WriteLine($"Error al invocar la API: {ex.Message}");
+                        return 0.0;
+                    }
+                }
+            }
+            public ActionResult Test4()
         {
             var request = new TourQuoteRequest
             {
